@@ -1,0 +1,36 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: protected-service
+spec:
+  selector:
+    app: protected-service
+  type: ClusterIP
+  ports:
+    - port: 8083
+      targetPort: 8083
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protected-service
+  labels:
+    app: protected-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: protected-service
+  template:
+    metadata:
+      labels:
+        app: protected-service
+    spec:
+      containers:
+        - name: protected-service
+          image: fotopiece/protected-service:latest
+          env:
+            - name: eureka.client.serviceUrl.defaultZone
+              value: http://discovery-service:8761/eureka/
+          ports:
+            - containerPort: 8083
